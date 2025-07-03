@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +7,7 @@ using RaymiMusic.Api.Data;
 using RaymiMusic.Data;
 using RaymiMusic.Modelos;
 using System;
+using System.Security.Claims;
 
 namespace RaymiMusic.MVC.Pages.Cuenta
 {
@@ -26,20 +29,34 @@ namespace RaymiMusic.MVC.Pages.Cuenta
         public string? ErrorMensaje { get; set; }
 
         public async Task<IActionResult> OnPostAsync()
-        {
+        { 
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == Correo);
+
 
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(Contrasena, usuario.HashContrasena))
             {
                 ErrorMensaje = "Correo o contraseña incorrectos.";
-                return Page();
+                return Page(); 
             }
 
-            HttpContext.Session.SetString("UsuarioId", usuario.Id.ToString());
-            HttpContext.Session.SetString("Correo", usuario.Correo);
-            HttpContext.Session.SetString("Rol", usuario.Rol);
+            if (usuario.Rol == "Cliente")
+            {
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, usuario.Correo),
+            new Claim(ClaimTypes.Role, usuario.Rol)
+        };
 
-            return RedirectToPage("/Index");
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                return RedirectToPage("~/Clientes/Index");
+            }
+
+            ErrorMensaje = "No tienes acceso como cliente.";
+            return Page();  
         }
+
     }
+
 }

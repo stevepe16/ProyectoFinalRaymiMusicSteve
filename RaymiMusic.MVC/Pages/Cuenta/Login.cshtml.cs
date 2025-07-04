@@ -29,9 +29,11 @@ namespace RaymiMusic.MVC.Pages.Cuenta
         public string? ErrorMensaje { get; set; }
 
         public async Task<IActionResult> OnPostAsync()
-        { 
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == Correo);
+        {
+            // Verifica si el formulario fue enviado
+            Console.WriteLine("Formulario enviado");
 
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == Correo);
 
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(Contrasena, usuario.HashContrasena))
             {
@@ -39,24 +41,44 @@ namespace RaymiMusic.MVC.Pages.Cuenta
                 return Page(); 
             }
 
-            if (usuario.Rol == "Cliente")
+            if (usuario.Correo == "admin@gmail.com")
             {
+
                 var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, usuario.Correo),
-            new Claim(ClaimTypes.Role, usuario.Rol)
+            new Claim(ClaimTypes.Role, "Admin")
         };
 
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
+
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-                return RedirectToPage("~/Clientes/Index");
+
+                Console.WriteLine("Redirigiendo a /Index");
+                return RedirectToPage("/Index");
             }
 
-            ErrorMensaje = "No tienes acceso como cliente.";
-            return Page();  
+            if (usuario.Rol == "Cliente")
+            {
+
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, usuario.Correo),
+            new Claim(ClaimTypes.Role, "Cliente")  
+        };
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                Console.WriteLine("Redirigiendo a Clientes/Index");
+                return RedirectToPage("/Clientes/Index");
+            }
+            ErrorMensaje = "No tienes acceso como cliente o administrador.";
+            return Page(); 
         }
 
     }
-
 }

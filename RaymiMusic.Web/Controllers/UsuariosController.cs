@@ -91,5 +91,20 @@ namespace RaymiMusic.Api.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        // GET: api/Usuarios/porcorreo?correo=ejemplo@gmail.com
+        [HttpGet("porcorreo")]
+        public async Task<ActionResult<Usuario>> GetUsuarioPorCorreo(string correo)
+        {
+            var usuario = await _context.Usuarios
+                .Include(u => u.PlanSuscripcion)
+                .Include(u => u.Perfil)
+                .FirstOrDefaultAsync(u => u.Correo == correo);
+
+            if (usuario == null) return NotFound();
+
+            return usuario;
+        }
+
     }
 }

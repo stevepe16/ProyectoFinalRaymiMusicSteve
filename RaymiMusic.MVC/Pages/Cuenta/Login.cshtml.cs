@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +5,6 @@ using RaymiMusic.Api.Data;
 using RaymiMusic.Data;
 using RaymiMusic.Modelos;
 using System;
-using System.Security.Claims;
 
 namespace RaymiMusic.MVC.Pages.Cuenta
 {
@@ -30,55 +27,35 @@ namespace RaymiMusic.MVC.Pages.Cuenta
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Verifica si el formulario fue enviado
-            Console.WriteLine("Formulario enviado");
-
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == Correo);
 
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(Contrasena, usuario.HashContrasena))
             {
                 ErrorMensaje = "Correo o contraseña incorrectos.";
-                return Page(); 
+                return Page();
             }
 
-            if (usuario.Correo == "admin@gmail.com")
+            HttpContext.Session.SetString("UsuarioId", usuario.Id.ToString());
+            HttpContext.Session.SetString("Correo", usuario.Correo);
+            HttpContext.Session.SetString("Rol", usuario.Rol);
+
+            // Redirige según el rol del usuario
+            switch (usuario.Rol.ToLower())
             {
+                case "admin":
+                    return RedirectToPage("/Index");
 
-                var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, usuario.Correo),
-            new Claim(ClaimTypes.Role, "Admin")
-        };
+                case "artista":
+                    return RedirectToPage("/Artista/Index");
 
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
+                case "free":
+                case "premium":
+                    return RedirectToPage("/Cliente/Index");
 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                Console.WriteLine("Redirigiendo a /Index");
-                return RedirectToPage("/Index");
+                default:
+                    ErrorMensaje = "Rol de usuario no reconocido.";
+                    return Page();
             }
-
-            if (usuario.Rol == "Cliente")
-            {
-
-                var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, usuario.Correo),
-            new Claim(ClaimTypes.Role, "Cliente")  
-        };
-
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                Console.WriteLine("Redirigiendo a Clientes/Index");
-                return RedirectToPage("/Clientes/Index");
-            }
-            ErrorMensaje = "No tienes acceso como cliente o administrador.";
-            return Page(); 
         }
-
     }
 }

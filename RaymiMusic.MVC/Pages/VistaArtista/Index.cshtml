@@ -1,0 +1,33 @@
+﻿@page
+@model RaymiMusic.MVC.Pages.VistaArtista.PerfilModel
+@{
+    Layout = "~/Pages/Shared/_LayoutCliente.cshtml";
+    ViewData["Title"] = "Perfil del Artista";
+}
+
+<div class="container">
+    <h3>Mi Perfil</h3>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="NombreArtistico" class="form-label">Nombre artístico</label>
+            <input type="text" class="form-control" id="NombreArtistico" name="NombreArtistico" value="@Model.Artista?.NombreArtistico" required />
+        </div>
+
+        <div class="mb-3">
+            <label for="Biografia" class="form-label">Biografía</label>
+            <textarea class="form-control" id="Biografia" name="Biografia">@Model.Artista?.Biografia</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="FotoPerfil" class="form-label">Foto de perfil</label>
+            <input type="file" class="form-control" id="FotoPerfil" name="FotoPerfil" />
+        </div>
+
+        <div class="mb-3 text-center">
+            <img src="@Model.Artista?.UrlFotoPerfil ?? " /media/perfil/default-user.png"" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;" alt="Foto de perfil" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Actualizar Perfil</button>
+    </form>
+</div>

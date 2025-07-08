@@ -26,6 +26,7 @@ namespace RaymiMusic.Modelos
         // Álbumes del artista 1:N
         public ICollection<Album> Albumes { get; set; }
             = new List<Album>();
+        public string Correo { get; set; }
     }
 
 }

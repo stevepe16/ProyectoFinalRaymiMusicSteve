@@ -35,30 +35,46 @@ public class CreateModel : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync()
-    {
-        Generos = await _genSvc.ObtenerTodosAsync();
-        Artistas = await _artSvc.ObtenerTodosAsync();
-
-        if (!ModelState.IsValid)
+        public async Task<IActionResult> OnPostAsync()
         {
-            Errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return Page();
+            Generos = await _genSvc.ObtenerTodosAsync();
+            Artistas = await _artSvc.ObtenerTodosAsync();
+
+            if (!ModelState.IsValid)
+            {
+                Errores = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return Page();
+            }
+
+            // Obtener la duración desde el formulario como texto
+            string duracionText = Cancion.Duracion.ToString(); // Aquí asumimos que 'Duracion' es un string desde el formulario
+
+            // Intentamos convertir el texto a TimeSpan
+            if (TimeSpan.TryParse(duracionText, out TimeSpan duracion))
+            {
+                // Asignamos la duración convertida al modelo
+                Cancion.Duracion = duracion;
+            }
+            else
+            {
+                ModelState.AddModelError("Duracion", "El formato de duración no es válido.");
+                return Page(); // Regresamos si la duración no tiene el formato correcto
+            }
+
+            var rol = HttpContext.Session.GetString("Rol");
+            var correo = HttpContext.Session.GetString("Correo");
+
+            if (rol == "Artista")
+            {
+                var artista = await _artSvc.ObtenerPorCorreoAsync(correo!);
+                if (artista == null) return Unauthorized();
+                Cancion.ArtistaId = artista.Id;
+            }
+
+            Cancion.Id = Guid.NewGuid();
+            await _svc.CrearAsync(Cancion);
+            return RedirectToPage("Index");
         }
 
-        var rol = HttpContext.Session.GetString("Rol");
-        var correo = HttpContext.Session.GetString("Correo");
-
-        if (rol == "Artista")
-        {
-            var artista = await _artSvc.ObtenerPorCorreoAsync(correo!);
-            if (artista == null) return Unauthorized();
-            Cancion.ArtistaId = artista.Id;
-        }
-
-        Cancion.Id = Guid.NewGuid();
-        await _svc.CrearAsync(Cancion);
-        return RedirectToPage("Index");
     }
-}
 }

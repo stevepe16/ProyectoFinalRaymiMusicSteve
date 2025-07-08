@@ -1,0 +1,36 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Artista</title>
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/styles.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar -->
+        <div class="bg-dark text-white" id="sidebar">
+            <div class="sidebar-heading text-center">Bienvenido Artista</div>
+            <ul class="list-unstyled">
+                <li><a href="/Artista/Index">Inicio</a></li>
+                <li><a href="/Artista/CrearCancion">Subir Canción</a></li>
+                <li><a href="/Artista/Perfil">Perfil</a></li>
+                <li><a href="/Logout">Cerrar sesión</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

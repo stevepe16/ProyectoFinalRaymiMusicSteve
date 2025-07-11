@@ -1,33 +1,27 @@
 ﻿@page
-@model RaymiMusic.MVC.Pages.VistaArtista.PerfilModel
+@model RaymiMusic.MVC.Pages.VistaArtista.IndexModel
 @{
-    Layout = "~/Pages/Shared/_LayoutCliente.cshtml";
-    ViewData["Title"] = "Perfil del Artista";
+    Layout = "~/Pages/Shared/_LayoutArtista.cshtml";
+    ViewData["Title"] = "Mis Canciones";
 }
 
 <div class="container">
-    <h3>Mi Perfil</h3>
+    <h3 class="text-center mb-4">Mis Canciones</h3>
 
-    <form method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="NombreArtistico" class="form-label">Nombre artístico</label>
-            <input type="text" class="form-control" id="NombreArtistico" name="NombreArtistico" value="@Model.Artista?.NombreArtistico" required />
-        </div>
-
-        <div class="mb-3">
-            <label for="Biografia" class="form-label">Biografía</label>
-            <textarea class="form-control" id="Biografia" name="Biografia">@Model.Artista?.Biografia</textarea>
-        </div>
-
-        <div class="mb-3">
-            <label for="FotoPerfil" class="form-label">Foto de perfil</label>
-            <input type="file" class="form-control" id="FotoPerfil" name="FotoPerfil" />
-        </div>
-
-        <div class="mb-3 text-center">
-            <img src="@Model.Artista?.UrlFotoPerfil ?? " /media/perfil/default-user.png"" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;" alt="Foto de perfil" />
-        </div>
-
-        <button type="submit" class="btn btn-success">Actualizar Perfil</button>
-    </form>
+    @if (Model.Canciones != null && Model.Canciones.Any())
+    {
+        <ul class="list-group">
+            @foreach (var cancion in Model.Canciones)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@cancion.Titulo</span> <!-- Mostrar el título de la canción -->
+                    <a href="@Url.Page("/VistaArtista/Reproducir", new { id = cancion.Id })" class="btn btn-sm btn-info">Reproducir</a>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No tienes canciones registradas.</p>
+    }
 </div>

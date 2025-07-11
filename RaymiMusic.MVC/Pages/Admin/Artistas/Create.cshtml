@@ -24,6 +24,11 @@
         <input asp-for="Artista.UrlFotoPortada" class="form-control" />
         <span asp-validation-for="Artista.UrlFotoPortada" class="text-danger" />
     </div>
+    <div class="form-group">
+        <label asp-for="Artista.Correo"></label>
+        <textarea asp-for="Artista.Correo" class="form-control"></textarea>
+        <span asp-validation-for="Artista.Correo" class="text-danger" />
+    </div>
     <button type="submit" class="btn btn-primary">Guardar</button>
     <a asp-page="Index" class="btn btn-secondary">Cancelar</a>
 </form>

@@ -16,6 +16,9 @@ namespace RaymiMusic.MVC.Pages.Cuenta
         }
 
         [BindProperty]
+        public string NombreArtistico { get; set; } = null!;
+
+        [BindProperty]
         public string Correo { get; set; } = null!;
 
         [BindProperty]
@@ -28,12 +31,14 @@ namespace RaymiMusic.MVC.Pages.Cuenta
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Validación si el correo ya está registrado
             if (await _context.Usuarios.AnyAsync(u => u.Correo == Correo))
             {
                 ErrorMensaje = "Ya existe una cuenta con este correo.";
                 return Page();
             }
 
+            // Asignación de rol basado en el tipo de cuenta
             string rol = TipoCuenta == "Artista" ? "Artista" : "Free";
 
             var nuevoUsuario = new Usuario
@@ -55,12 +60,14 @@ namespace RaymiMusic.MVC.Pages.Cuenta
                 _context.Artistas.Add(new Artista
                 {
                     Id = Guid.NewGuid(),
-                    NombreArtistico = Correo
+                    NombreArtistico = NombreArtistico,  
+                    Correo = Correo  
                 });
             }
 
             await _context.SaveChangesAsync();
             return RedirectToPage("/Cuenta/Login");
         }
+
     }
 }

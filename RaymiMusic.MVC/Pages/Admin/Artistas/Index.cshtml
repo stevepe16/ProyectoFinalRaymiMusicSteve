@@ -12,6 +12,7 @@
         <tr>
             <th>Nombre Artístico</th>
             <th>Biografía</th>
+            <th>Correo</th>
             <th></th>
         </tr>
     </thead>
@@ -21,6 +22,7 @@
             <tr>
                 <td>@a.NombreArtistico</td>
                 <td>@a.Biografia</td>
+                <td>@a.Correo</td>
                 <td>
                     <a asp-page="Edit" asp-route-id="@a.Id">Editar</a> |
                     <a asp-page="Delete" asp-route-id="@a.Id">Eliminar</a>

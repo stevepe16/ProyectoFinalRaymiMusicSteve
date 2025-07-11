@@ -54,6 +54,10 @@ namespace RaymiMusic.Api.Migrations
                     b.Property<string>("Biografia")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Correo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NombreArtistico")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

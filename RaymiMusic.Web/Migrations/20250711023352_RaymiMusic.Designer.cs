@@ -12,8 +12,8 @@ using RaymiMusic.Api.Data;
 namespace RaymiMusic.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250625164916_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250711023352_RaymiMusic")]
+    partial class RaymiMusic
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,6 +55,10 @@ namespace RaymiMusic.Api.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Biografia")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Correo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NombreArtistico")

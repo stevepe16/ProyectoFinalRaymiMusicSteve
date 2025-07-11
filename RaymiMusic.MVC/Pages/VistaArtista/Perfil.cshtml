@@ -1,37 +1,51 @@
 ﻿@page
 @model RaymiMusic.MVC.Pages.VistaArtista.PerfilModel
 @{
-    Layout = "~/Pages/Shared/_LayoutCliente.cshtml";
+    Layout = "~/Pages/Shared/_LayoutArtista.cshtml";
     ViewData["Title"] = "Perfil del Artista";
 }
 
-<div class="card p-4 mx-auto" style="max-width: 600px;">
-    <h3 class="text-center mb-4"><i class="bi bi-person-circle me-2"></i> Perfil del Artista</h3>
+<div class="container">
+    <h3 class="text-center mb-4">Mi Perfil</h3>
 
-    <div class="text-center mb-3">
-        <img src="@Model.Artista?.UrlFotoPerfil ?? " /media/perfil/default-user.png""
-             alt="Foto de perfil"
-             class="rounded-circle"
-             style="width: 120px; height: 120px; object-fit: cover;" />
-    </div>
+    @if (Model.Artista != null)
+    {
+        <form method="post">
+            <div class="row mb-4 align-items-center">
+                <!-- Foto de perfil -->
+                <div class="col-md-4 text-center">
+                    @if (!string.IsNullOrEmpty(Model.Artista?.UrlFotoPerfil))
+                    {
+                        <img src="@Model.Artista.UrlFotoPerfil" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" alt="Foto de perfil" />
+                    }
+                    else
+                    {
+                        <img src="/media/perfil/default-user.png" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" alt="Foto de perfil" />
+                    }
+                </div>
 
-    <dl class="row">
-        <dt class="col-sm-4"><i class="bi bi-person-fill me-2"></i> Nombre artístico</dt>
-        <dd class="col-sm-8">@Model.Artista?.NombreArtistico</dd>
+                <!-- Nombre artístico y biografía -->
+                <div class="col-md-8">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Nombre artístico</h5>
+                            <input type="text" class="form-control" value="@Model.Artista?.NombreArtistico" readonly />
+                        </div>
+                    </div>
 
-        <dt class="col-sm-4"><i class="bi bi-info-circle me-2"></i> Biografía</dt>
-        <dd class="col-sm-8">@Model.Artista?.Biografia</dd>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Biografía</h5>
+                            <textarea class="form-control" rows="5" readonly>@Model.Artista?.Biografia</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <dt class="col-sm-4"><i class="bi bi-album me-2"></i> Álbumes</dt>
-        <dd class="col-sm-8">@Model.Artista?.Albumes?.Count() ?? 0</dd>
-
-        <dt class="col-sm-4"><i class="bi bi-music-note me-2"></i> Canciones</dt>
-        <dd class="col-sm-8">@Model.Artista?.Canciones?.Count() ?? 0</dd>
-    </dl>
-
-    <div class="text-center">
-        <a asp-page="./EditarPerfil" class="btn btn-success">
-            <i class="bi bi-pencil-square"></i> Editar Perfil
-        </a>
-    </div>
+            <!-- Botón de actualización (redirige a otra vista) -->
+            <div class="d-flex justify-content-center">
+                <a href="@Url.Page("/VistaArtista/EditarPerfil")" class="btn btn-success btn-lg">Actualizar Perfil</a>
+            </div>
+        </form>
+    }
 </div>

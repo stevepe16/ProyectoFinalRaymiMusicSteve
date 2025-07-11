@@ -16,49 +16,25 @@ namespace RaymiMusic.MVC.Pages.VistaArtista
             _context = context;
         }
 
-        [BindProperty]
         public Artista? Artista { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var usuarioId = HttpContext.Session.GetString("UsuarioId");
-            if (string.IsNullOrEmpty(usuarioId))
+            // Obtener el correo desde la sesión
+            var correo = HttpContext.Session.GetString("Correo");
+            if (string.IsNullOrEmpty(correo))
                 return RedirectToPage("/Cuenta/Login");
 
-            var id = Guid.Parse(usuarioId);  // Convertimos el id a Guid
-            // Buscamos el artista por el ID del usuario
+            // Buscar al artista por el correo del usuario
             Artista = await _context.Artistas
                 .Include(a => a.Canciones)
                 .Include(a => a.Albumes)
-                .FirstOrDefaultAsync(a => a.Id == id);
+                .FirstOrDefaultAsync(a => a.Correo == correo);
 
             if (Artista == null)
                 return NotFound();
 
             return Page();
-        }
-
-        public async Task<IActionResult> OnPostAsync(IFormFile? fotoPerfil)
-        {
-            if (!ModelState.IsValid) return Page();
-
-            // Si se sube una nueva foto
-            if (fotoPerfil != null)
-            {
-                var filePath = Path.Combine("wwwroot", "media", "perfil", fotoPerfil.FileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await fotoPerfil.CopyToAsync(stream);
-                }
-
-                Artista.UrlFotoPerfil = "/media/perfil/" + fotoPerfil.FileName;
-            }
-
-            // Guardamos los cambios
-            _context.Artistas.Update(Artista);
-            await _context.SaveChangesAsync();
-
-            return RedirectToPage("Perfil");
         }
     }
 }

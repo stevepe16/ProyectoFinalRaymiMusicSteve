@@ -88,16 +88,16 @@ namespace RaymiMusic.Api.Controllers
             return NoContent();
         }
 
-        [HttpGet("por-correo/{correo}")]
-        public async Task<ActionResult<Artista>> ObtenerPorCorreo(string correo)
-        {
-            var artista = await _context.Artistas
-                .Where(a => a.NombreArtistico == correo)  // Ajusta esto según cómo enlazas artistas a usuarios
-                .SingleOrDefaultAsync();
+        //[HttpGet("por-correo/{correo}")]
+        //public async Task<ActionResult<Artista>> ObtenerPorCorreo(string correo)
+        //{
+        //    var artista = await _context.Artistas
+        //        .Where(a => a.NombreArtistico == correo)  // Ajusta esto según cómo enlazas artistas a usuarios
+        //        .SingleOrDefaultAsync();
 
-            if (artista == null) return NotFound();
-            return artista;
-        }
+        //    if (artista == null) return NotFound();
+        //    return artista;
+        //}
 
     }
 }

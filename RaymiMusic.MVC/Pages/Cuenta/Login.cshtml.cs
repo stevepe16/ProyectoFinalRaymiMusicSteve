@@ -46,7 +46,7 @@ namespace RaymiMusic.MVC.Pages.Cuenta
                     return RedirectToPage("/Index");
 
                 case "artista":
-                    return RedirectToPage("/Artista/Index");
+                    return RedirectToPage("/VistaArtista/Index");
 
                 case "free":
                 case "premium":

@@ -26,4 +26,8 @@
     <ProjectReference Include="..\RaymiMusic.Modelos\RaymiMusic.Modelos.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

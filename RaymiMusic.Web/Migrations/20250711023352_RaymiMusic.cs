@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RaymiMusic.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class RaymiMusic : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +19,8 @@ namespace RaymiMusic.Api.Migrations
                     NombreArtistico = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Biografia = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UrlFotoPerfil = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UrlFotoPortada = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    UrlFotoPortada = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Correo = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

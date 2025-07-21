@@ -121,27 +121,26 @@ namespace RaymiMusic.AppWeb.Controllers
                 return View(vm);
             }
 
-            // Verificar que el email está confirmado
             var ok = await _ctx.EmailConfirmations
                 .AnyAsync(c => c.UsuarioId == user.Id
                             && c.Purpose == ConfirmationPurpose.EmailVerification
                             && c.IsConfirmed);
             if (!ok)
             {
-                ModelState.AddModelError("",
-                    "Debes confirmar tu correo antes de iniciar sesión.");
+                ModelState.AddModelError("", "Debes confirmar tu correo antes de iniciar sesión.");
                 return View(vm);
             }
 
-            // Crear claims y firmar
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name,           user.Correo),
-                new Claim(ClaimTypes.Role,           user.Rol)
-            };
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Name,           user.Correo),
+        new Claim(ClaimTypes.Role,           user.Rol)
+    };
+
             var identity = new ClaimsIdentity(
                 claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(identity),
@@ -151,8 +150,21 @@ namespace RaymiMusic.AppWeb.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
                 });
 
-            return RedirectToAction("Index", "Home");
+            // Redirección por rol
+            switch (user.Rol.ToLower())
+            {
+                case "artista":
+                    return RedirectToAction("Dashboard", "Dashboard", new { id = user.Id });
+                case "free":
+                case "premium":
+                    return RedirectToAction("Index", "Home");
+                case "admin":
+                    return RedirectToAction("");
+                default:
+                    return RedirectToAction("Index", "Home");
+            }
         }
+
 
         // POST /Account/Logout
         [HttpPost, ValidateAntiForgeryToken]
@@ -280,6 +292,8 @@ namespace RaymiMusic.AppWeb.Controllers
                 Biografia = vm.Biografia,
                 UrlFotoPerfil = vm.UrlFotoPerfil,
                 UrlFotoPortada = vm.UrlFotoPortada
+
+
             };
 
             _ctx.Artistas.Add(artista);

@@ -1,147 +1,69 @@
 ﻿@model ArtistDashboardVM
-
 @{
     ViewData["Title"] = "Dashboard del Artista";
 }
 
-<h1>Dashboard de Artista: @Model.NombreArtista</h1>
+<h2 class="text-center mb-4">Panel de @Model.NombreArtista</h2>
 
-<!-- Mostrar los totales del artista -->
-<div>
-    <h3>Estadísticas Generales</h3>
-    <ul>
-        <li><strong>Total de Canciones:</strong> @Model.TotalCanciones</li>
-        <li><strong>Total de Álbumes:</strong> @Model.TotalAlbumes</li>
-        <li><strong>Total de Playlists Públicas:</strong> @Model.TotalPlaylists</li>
-    </ul>
+<!-- Totales del artista -->
+<div class="d-flex justify-content-around text-center mb-5">
+    <div class="card p-4 shadow rounded" style="width: 200px;">
+        <h5>Canciones</h5>
+        <h2>@Model.TotalCanciones</h2>
+    </div>
+    <div class="card p-4 shadow rounded" style="width: 200px;">
+        <h5>Álbumes</h5>
+        <h2>@Model.TotalAlbumes</h2>
+    </div>
 </div>
 
-<!-- Gráfico de barras con Totales (Canciones, Álbumes y Playlists) -->
-<canvas id="totalesChart" width="400" height="200"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    var ctxTotales = document.getElementById('totalesChart').getContext('2d');
-    var totalesChart = new Chart(ctxTotales, {
-        type: 'bar',
-        data: {
-            labels: ['Canciones', 'Álbumes', 'Playlists'],
-            datasets: [{
-                label: 'Totales',
-                data: [@Model.TotalCanciones, @Model.TotalAlbumes, @Model.TotalPlaylists],
-                backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'],
-                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-</script>
-
-<!-- Mostrar las últimas canciones -->
-<div>
-    <h3>Últimas Canciones</h3>
-    <table class="table">
-        <thead>
+<!-- Últimas Canciones -->
+<h4 class="mt-4">Últimas Canciones</h4>
+<table class="table table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>Título</th>
+            <th>Duración</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cancion in Model.UltimasCanciones)
+        {
             <tr>
-                <th>Título</th>
-                <th>Álbum</th>
-                <th>Duración</th>
-                <th>Ruta de Archivo</th>
+                <td>@cancion.Titulo</td>
+                <td>@cancion.Duracion.ToString(@"hh\:mm\:ss")</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var cancion in Model.UltimasCanciones)
-            {
-                <tr>
-                    <td>@cancion.Titulo</td>
-                    <td>@cancion.AlbumNombre</td>
-                    <td>@cancion.Duracion</td>
-                    <td>@cancion.RutaArchivo</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        }
+    </tbody>
+</table>
+
+<!-- Gráficas -->
+<div class="row mt-5">
+    <div class="col-md-4">
+        <h5 class="text-center">Duración de Canciones</h5>
+        <canvas id="cancionesChart"></canvas>
+    </div>
+    <div class="col-md-4">
+        <h5 class="text-center">Reproducciones por Canción</h5>
+        <canvas id="reproduccionesChart"></canvas>
+    </div>
+    <div class="col-md-4">
+        <h5 class="text-center">Canciones y Albums Totales</h5>
+        <canvas id="totalesChart"></canvas>
+    </div>
 </div>
 
-<!-- Gráfico de barras con las últimas canciones -->
-<canvas id="cancionesChart" width="400" height="200"></canvas>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-    var ctxCanciones = document.getElementById('cancionesChart').getContext('2d');
-    var cancionesChart = new Chart(ctxCanciones, {
-        type: 'bar',
-        data: {
-            labels: @Html.Raw(Json.Serialize(Model.UltimasCanciones.Select(c => c.Titulo))),
-            datasets: [{
-                label: 'Duración de Canciones (en segundos)',
-                data: @Html.Raw(Json.Serialize(Model.UltimasCanciones.Select(c => c.Duracion.TotalSeconds))),
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-</script>
+    <script>
+        // Datos para dashboard.js
+        window.duracionLabels = @Html.Raw(Json.Serialize(Model.UltimasCanciones.Select(c => c.Titulo)));
+        window.duracionData = @Html.Raw(Json.Serialize(Model.UltimasCanciones.Select(c => c.Duracion.TotalSeconds)));
+        window.totalData = [@Model.TotalCanciones, @Model.TotalAlbumes];
+        window.repsLabels = @Html.Raw(Json.Serialize(Model.CancionesConReproducciones.Select(c => c.Titulo)));
+        window.repsData = @Html.Raw(Json.Serialize(Model.CancionesConReproducciones.Select(c => c.TotalReproducciones)));
+    </script>
 
-<!-- Gráfico de pastel con reproducciones de todas las canciones -->
-<h3>Cantidad de Reproducciones por Canción</h3>
-<canvas id="reproduccionesChart" width="400" height="300"></canvas>
-
-<script>
-    var ctxReproducciones = document.getElementById('reproduccionesChart').getContext('2d');
-    var reproduccionesChart = new Chart(ctxReproducciones, {
-        type: 'pie',
-        data: {
-            labels: @Html.Raw(Json.Serialize(Model.CancionesConReproducciones.Select(c => c.Titulo))),
-            datasets: [{
-                label: 'Reproducciones',
-                data: @Html.Raw(Json.Serialize(Model.CancionesConReproducciones.Select(c => c.TotalReproducciones))),
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)',
-                    'rgba(199, 199, 199, 0.6)',
-                    'rgba(83, 102, 255, 0.6)',
-                    'rgba(100, 200, 100, 0.6)',
-                    'rgba(255, 102, 153, 0.6)'
-                ],
-                borderColor: 'white',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'right'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.label}: ${context.raw} reproducciones`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-</script>
+    <script src="~/js/dashboard.js"></script>
+}

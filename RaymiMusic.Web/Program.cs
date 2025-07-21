@@ -4,6 +4,16 @@ using RaymiMusic.Api.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+// Agrega política CORS para permitir solicitudes del MVC
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirFrontend", policy =>
+    {
+        policy.WithOrigins("https://localhost:7029")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -35,6 +45,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Activa CORS antes de Authorization
+app.UseCors("PermitirFrontend");
 
 app.UseAuthorization();
 

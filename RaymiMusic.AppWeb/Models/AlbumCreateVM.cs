@@ -18,6 +18,8 @@ namespace RaymiMusic.AppWeb.Models
 
         // Sólo para el dropdown de Admin
         public SelectList? Artistas { get; set; }
+        // Para el rol Artista: lista de canciones disponibles
+        public List<SelectListItem> CancionesDisponibles { get; set; } = new();
     }
 
 }

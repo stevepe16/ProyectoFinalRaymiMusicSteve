@@ -1,91 +1,178 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using RaymiMusic.Api.Data;
 using RaymiMusic.Modelos;
+using RaymiMusic.AppWeb.Models;
 
-namespace RaymiMusic.Api.Controllers
+namespace RaymiMusic.AppWeb.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AlbumesController : ControllerBase
+    [Authorize]
+    public class AlbumsController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _ctx;
+        public AlbumsController(AppDbContext ctx) => _ctx = ctx;
 
-        public AlbumesController(AppDbContext context)
+        private Guid CurrentUserId =>
+            Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        private bool IsArtist => User.IsInRole("artista");
+
+        // GET: /Albums
+        public async Task<IActionResult> Index()
         {
-            _context = context;
+            var query = _ctx.Albumes
+                            .Include(a => a.Artista)
+                            .AsQueryable();
+
+            if (IsArtist)
+                query = query.Where(a => a.ArtistaId == CurrentUserId);
+
+            var list = await query.AsNoTracking().ToListAsync();
+
+            if (IsArtist)
+                return View("IndexArtista", list);
+
+            return View(list);
         }
 
-        // GET: api/Albumes
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Album>>> GetAlbumes()
+        // GET: /Albums/Details/{id}
+        public async Task<IActionResult> Details(Guid id)
         {
-            return await _context.Albumes
-                                 .Include(a => a.Artista)
-                                 .Include(a => a.Canciones)
-                                 .ToListAsync();
-        }
-
-        // GET: api/Albumes/{id}
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Album>> GetAlbum(Guid id)
-        {
-            var album = await _context.Albumes
-                                      .Include(a => a.Artista)
-                                      .Include(a => a.Canciones)
-                                      .FirstOrDefaultAsync(a => a.Id == id);
-            if (album == null) return NotFound();
-            return album;
-        }
-
-        // POST: api/Albumes
-        [HttpPost]
-        public async Task<ActionResult<Album>> PostAlbum(Album album)
-        {
-            album.Id = Guid.NewGuid();
-            _context.Albumes.Add(album);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetAlbum),
-                                   new { id = album.Id },
-                                   album);
-        }
-
-        // PUT: api/Albumes/{id}
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> PutAlbum(Guid id, Album album)
-        {
-            if (id != album.Id) return BadRequest();
-
-            _context.Entry(album).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                bool exists = await _context.Albumes.AnyAsync(a => a.Id == id);
-                if (!exists) return NotFound();
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/Albumes/{id}
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> DeleteAlbum(Guid id)
-        {
-            var album = await _context.Albumes.FindAsync(id);
+            var album = await _ctx.Albumes
+                                  .Include(a => a.Artista)
+                                  .FirstOrDefaultAsync(a => a.Id == id);
             if (album == null) return NotFound();
 
-            _context.Albumes.Remove(album);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            if (IsArtist && album.ArtistaId != CurrentUserId)
+                return Forbid();
+
+            return View(album);
+        }
+
+        // GET: /Albums/Create
+        public IActionResult Create()
+        {
+            var vm = new AlbumCreateVM();
+            if (User.IsInRole("Admin"))
+            {
+                vm.Artistas = new SelectList(_ctx.Artistas, "Id", "NombreArtistico");
+            }
+            else
+            {
+                // Para artista, forzarle su propio Id
+                vm.ArtistaId = CurrentUserId;
+            }
+            return View(vm);
+        }
+
+        // POST: /Albums/Create
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(AlbumCreateVM vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                if (User.IsInRole("Admin"))
+                    vm.Artistas = new SelectList(_ctx.Artistas, "Id", "NombreArtistico", vm.ArtistaId);
+                return View(vm);
+            }
+
+            var entidad = new Album
+            {
+                Id = Guid.NewGuid(),
+                Titulo = vm.Titulo,
+                FechaLanzamiento = vm.FechaLanzamiento,
+                ArtistaId = User.IsInRole("Admin")
+                               ? vm.ArtistaId
+                               : CurrentUserId
+            };
+            _ctx.Albumes.Add(entidad);
+            await _ctx.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /Albums/Edit/{id}
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var album = await _ctx.Albumes.FindAsync(id);
+            if (album == null) return NotFound();
+
+            if (IsArtist && album.ArtistaId != CurrentUserId)
+                return Forbid();
+
+            var vm = new AlbumEditVM
+            {
+                Id = album.Id,
+                Titulo = album.Titulo,
+                FechaLanzamiento = album.FechaLanzamiento,
+                ArtistaId = album.ArtistaId,
+                Artistas = User.IsInRole("Admin")
+                    ? new SelectList(_ctx.Artistas, "Id", "NombreArtistico", album.ArtistaId)
+                    : null
+            };
+            return View(vm);
+        }
+
+        // POST: /Albums/Edit/{id}
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, AlbumEditVM vm)
+        {
+            if (User.IsInRole("Artista"))
+                vm.ArtistaId = CurrentUserId;
+
+            if (!ModelState.IsValid)
+            {
+                if (User.IsInRole("Admin"))
+                    vm.Artistas = new SelectList(_ctx.Artistas, "Id", "NombreArtistico", vm.ArtistaId);
+                return View(vm);
+            }
+
+            var album = await _ctx.Albumes.FindAsync(id);
+            if (album == null) return NotFound();
+
+            if (IsArtist && album.ArtistaId != CurrentUserId)
+                return Forbid();
+
+            album.Titulo = vm.Titulo;
+            album.FechaLanzamiento = vm.FechaLanzamiento;
+            album.ArtistaId = vm.ArtistaId;
+
+            await _ctx.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /Albums/Delete/{id}
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var album = await _ctx.Albumes
+                                  .Include(a => a.Artista)
+                                  .FirstOrDefaultAsync(a => a.Id == id);
+            if (album == null) return NotFound();
+
+            if (IsArtist && album.ArtistaId != CurrentUserId)
+                return Forbid();
+
+            return View(album);
+        }
+
+        // POST: /Albums/Delete/{id}
+        [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            var album = await _ctx.Albumes.FindAsync(id);
+            if (album == null) return NotFound();
+
+            if (IsArtist && album.ArtistaId != CurrentUserId)
+                return Forbid();
+
+            _ctx.Albumes.Remove(album);
+            await _ctx.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

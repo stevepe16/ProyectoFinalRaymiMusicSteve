@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RaymiMusic.Api.Data;
 
@@ -11,9 +12,11 @@ using RaymiMusic.Api.Data;
 namespace RaymiMusic.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250722005626_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,10 +55,6 @@ namespace RaymiMusic.Api.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Biografia")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Correo")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NombreArtistico")
@@ -136,8 +135,6 @@ namespace RaymiMusic.Api.Migrations
                     b.ToTable("CancionesEnListas");
                 });
 
-<<<<<<< Updated upstream
-=======
             modelBuilder.Entity("RaymiMusic.Modelos.Descarga", b =>
                 {
                     b.Property<Guid>("Id")
@@ -209,7 +206,6 @@ namespace RaymiMusic.Api.Migrations
                     b.ToTable("Follow");
                 });
 
->>>>>>> Stashed changes
             modelBuilder.Entity("RaymiMusic.Modelos.Genero", b =>
                 {
                     b.Property<Guid>("Id")
@@ -360,7 +356,7 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.Artista", "Artista")
                         .WithMany("Albumes")
                         .HasForeignKey("ArtistaId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Artista");
@@ -375,13 +371,13 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.Artista", "Artista")
                         .WithMany("Canciones")
                         .HasForeignKey("ArtistaId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RaymiMusic.Modelos.Genero", "Genero")
                         .WithMany("Canciones")
                         .HasForeignKey("GeneroId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Album");
@@ -396,7 +392,7 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.Cancion", "Cancion")
                         .WithMany("CancionesEnListas")
                         .HasForeignKey("CancionId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RaymiMusic.Modelos.ListaPublica", null)
@@ -406,7 +402,7 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.ListaReproduccion", "ListaReproduccion")
                         .WithMany("CancionesEnListas")
                         .HasForeignKey("ListaReproduccionId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cancion");
@@ -419,7 +415,7 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.Cancion", "Cancion")
                         .WithMany()
                         .HasForeignKey("CancionId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cancion");
@@ -430,13 +426,13 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.Artista", "Artista")
                         .WithMany()
                         .HasForeignKey("ArtistaId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RaymiMusic.Modelos.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Artista");
@@ -449,7 +445,7 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.Cancion", "Cancion")
                         .WithMany()
                         .HasForeignKey("CancionId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cancion");
@@ -460,7 +456,7 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.Usuario", "Usuario")
                         .WithMany("ListasReproduccion")
                         .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Usuario");
@@ -471,7 +467,7 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.Usuario", "Usuario")
                         .WithOne("Perfil")
                         .HasForeignKey("RaymiMusic.Modelos.Perfil", "UsuarioId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Usuario");
@@ -482,7 +478,7 @@ namespace RaymiMusic.Api.Migrations
                     b.HasOne("RaymiMusic.Modelos.PlanSuscripcion", "PlanSuscripcion")
                         .WithMany("Usuarios")
                         .HasForeignKey("PlanSuscripcionId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("PlanSuscripcion");

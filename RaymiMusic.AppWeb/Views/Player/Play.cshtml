@@ -1,0 +1,40 @@
+﻿@model RaymiMusic.AppWeb.Models.SongDTO
+@{
+    ViewData["Title"] = "Reproductor";
+}
+
+<div class="container py-5">
+    <div class="card mx-auto" style="max-width: 600px;">
+    <div class="card mx-auto" style="max-width: 600px;">
+        <div class="card-body text-center">
+            <h2 class="card-title">@Model.Titulo</h2>
+            <p class="text-muted">@Model.ArtistaNombre &mdash; @Model.AlbumNombre</p>
+                <audio id="audioPlayer" data-id="@Model.Id" controls autoplay style="width: 100%; margin-bottom: 1rem;">
+                <source src="@Model.RutaArchivo" type="audio/mpeg" />
+                Tu navegador no soporta reproducción de audio.
+            </audio>
+            <div>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary me-2">
+                    ← Volver a catálogo
+                </a>
+                <a asp-controller="Playlists"
+                   asp-action="AddSong"
+                   asp-route-songId="@Model.Id"
+                   class="btn btn-success">
+                    + Agregar a mi playlist
+                </a>
+                    <a id="btnDescargar"
+                       class="btn btn-outline-primary"
+                       href="/Canciones/Descargar/@Model.Id">
+                        <i class="bi bi-download"></i> Descargar canción
+                    </a>
+            </div>
+        </div>
+    </div>
+</div>
+    @section Scripts {
+        <script src="~/js/reproductor.js"></script>
+    }
+
+
+
